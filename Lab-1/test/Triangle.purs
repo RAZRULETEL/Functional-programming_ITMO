@@ -4,7 +4,6 @@ import Prelude
 import Effect (Effect)
 import Test.Unit.Main (runTest)
 import Test.Unit (suite, test)
-import Numbers (sumFold)
 import Test.Unit.Assert (equal) as Assert
 import Triangle (recursiveTriangle)
 
