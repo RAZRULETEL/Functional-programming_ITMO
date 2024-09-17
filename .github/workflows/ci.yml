@@ -40,20 +40,22 @@ jobs:
       - name: Install NPM dependencies
         run: npm install -g spago@next purescript@latest purs-tidy
 
-      - name: cd ${{ matrix.directory }} directory
-        run: cd ${{ matrix.directory }}
-
       - name: Install NPM dependencies
         run: npm install
+        working-directory: ./${{ matrix.directory }}
 
       - name: Check formatting
         run: purs-tidy check "src/**/*.purs"
+        working-directory: ./${{ matrix.directory }}
 
       - name: Install Spago dependencies
         run: spago install
+        working-directory: ./${{ matrix.directory }}
 
       - name: Build the project
         run: spago build
+        working-directory: ./${{ matrix.directory }}
 
       - name: Run tests
         run: spago test
+        working-directory: ./${{ matrix.directory }}
