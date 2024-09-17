@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install NPM dependencies
-        run: npm install -g spago@next purescript@latest purs-tidy
+        run: npm install -g spago@0.21.0 purescript@0.15.15 purs-tidy
 
       - name: Install NPM dependencies
         run: npm install
