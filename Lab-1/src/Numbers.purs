@@ -11,12 +11,13 @@ import Node.FS.Sync (readTextFile)
 
 import Data.String.Pattern (Pattern(..))
 import Data.Function (($))
-import Data.Array (fold, foldl, head, tail)
-import Data.Maybe (Maybe(Nothing), fromMaybe)
+import Data.Array (foldl, head, length, tail)
+import Data.Maybe (fromMaybe)
 
 import Type.Proxy (Proxy(Proxy))
 import Data.Semiring (add)
 import Data.BigInt (BigInt, fromString, fromTLInt, toString)
+import Data.Boolean (otherwise)
 
 bigZero = fromTLInt (Proxy :: Proxy 0)
 
@@ -35,6 +36,11 @@ sumCase :: Array BigInt -> BigInt
 sumCase arr = case arr of
   [] -> bigZero
   _ -> add (fromMaybe bigZero $ head arr) (sumCase $ fromMaybe [] $ tail arr)
+
+sumGuard :: Array BigInt -> BigInt
+sumGuard arr
+  | (length arr) == 0 = bigZero
+  | otherwise = add (fromMaybe bigZero $ head arr) (sumCase $ fromMaybe [] $ tail arr)
 
 sumFold :: String -> String
 sumFold text = toString $ foldl add bigZero (map strToBigInt $ splitByLine text)
@@ -57,4 +63,5 @@ main = do
   log $ "Usual recursion: " <> (toString $ sumRecursive bigArr)
   log $ "Tail recursion:  " <> (toString $ sumTailRecursive bigArr)
   log $ "Case recursion:  " <> (toString $ sumCase bigArr)
+  log $ "Guard recursion: " <> (toString $ sumGuard bigArr)
   log $ "Fold implementation: " <> sumFold text
