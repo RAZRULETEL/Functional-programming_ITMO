@@ -9,7 +9,7 @@ import Test.Unit.Main (runTest)
 import Data.Array (singleton, (:))
 import Type.Proxy (Proxy(..))
 import Data.BigInt (fromTLInt)
-import Numbers (sumCase, sumFold, sumGuard, sumRecursive, sumTailRecursive, textToIntArray)
+import Numbers (sumCase, sumFold, sumGuard, sumInfinite, sumRecursive, sumTailRecursive, textToIntArray)
 
 bigZero = fromTLInt (Proxy :: Proxy 0)
 bigOne = fromTLInt (Proxy :: Proxy 1)
@@ -100,3 +100,16 @@ testNumbers =
             test "Incorrect text"
                 $ Assert.equal "0"
                 $ sumFold "not a number"
+        suite "Infinite list sum" do
+            test "1 + 1"
+                $ Assert.equal (bigOne + bigOne)
+                $ sumInfinite (bigOne : bigOne : [])
+            test "77 + 123"
+                $ Assert.equal (bigSeventySeven + bigOneHundredTwentyThree)
+                $ sumInfinite (bigSeventySeven : bigOneHundredTwentyThree : [])
+            test "77 + 123 + 645"
+                $ Assert.equal (bigSeventySeven + bigOneHundredTwentyThree + bigSixHundredFourtyFive)
+                $ sumInfinite (bigSixHundredFourtyFive : bigSeventySeven : bigOneHundredTwentyThree : [])
+            test "645 + 0"
+                $ Assert.equal (bigZero + bigSixHundredFourtyFive)
+                $ sumInfinite (bigSixHundredFourtyFive : bigZero : [])

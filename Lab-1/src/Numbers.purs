@@ -16,10 +16,13 @@ import Data.Maybe (fromMaybe)
 
 import Type.Proxy (Proxy(Proxy))
 import Data.Semiring (add)
-import Data.BigInt (BigInt, fromString, fromTLInt, toString)
+import Data.BigInt (BigInt, fromString, fromTLInt, toInt, toString)
 import Data.Boolean (otherwise)
+import Data.List.Infinite (iterate)
+import Data.List.Infinite as INF
 
 bigZero = fromTLInt (Proxy :: Proxy 0)
+bigOne = fromTLInt (Proxy :: Proxy 1)
 
 sumRecursive :: Array BigInt -> BigInt
 sumRecursive [] = bigZero
@@ -50,6 +53,13 @@ sumFold text = toString $ foldl add bigZero (map strToBigInt $ splitByLine text)
 
   strToBigInt :: String -> BigInt
   strToBigInt text = fromMaybe bigZero (fromString text)
+
+sumInfinite :: Array BigInt -> BigInt
+sumInfinite arr = sumArray $ map (\i -> INF.index infinite (fromMaybe 0 $ toInt i)) arr
+  where
+  infinite = iterate (\e -> e + bigOne) bigZero
+--  filterIntersect arrInfinite arr = filter (\e -> not (elemIndex e arr == Nothing)) arrInfinite
+  sumArray arr = foldl add bigZero arr
 
 textToIntArray :: String -> Array BigInt
 textToIntArray text = map (\n -> fromMaybe bigZero (fromString n)) (split (Pattern "\n") text)
