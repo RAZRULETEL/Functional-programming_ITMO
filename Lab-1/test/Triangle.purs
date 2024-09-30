@@ -7,7 +7,6 @@ import Test.Unit (suite, test)
 import Test.Unit.Assert (equal) as Assert
 import Triangle (recursiveTriangle)
 
-
 testTriangle :: Effect Unit
 testTriangle =
   runTest do
