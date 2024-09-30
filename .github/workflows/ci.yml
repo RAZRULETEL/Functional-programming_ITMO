@@ -45,7 +45,7 @@ jobs:
         working-directory: ./${{ matrix.directory }}
 
       - name: Check formatting
-        run: purs-tidy check "src/**/*.purs"
+        run: purs-tidy check "src/**/*.purs" && purs-tidy check "test/**/*.purs"
         working-directory: ./${{ matrix.directory }}
 
       - name: Install Spago dependencies
