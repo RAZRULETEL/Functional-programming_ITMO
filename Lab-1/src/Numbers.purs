@@ -58,7 +58,7 @@ sumInfinite :: Array BigInt -> BigInt
 sumInfinite arr = sumArray $ map (\i -> INF.index infinite (fromMaybe 0 $ toInt i)) arr
   where
   infinite = iterate (\e -> e + bigOne) bigZero
---  filterIntersect arrInfinite arr = filter (\e -> not (elemIndex e arr == Nothing)) arrInfinite
+  --  filterIntersect arrInfinite arr = filter (\e -> not (elemIndex e arr == Nothing)) arrInfinite
   sumArray arr = foldl add bigZero arr
 
 textToIntArray :: String -> Array BigInt
