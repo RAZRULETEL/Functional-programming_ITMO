@@ -42,6 +42,7 @@ jobs:
 
       - name: Install NPM dependencies
         run: npm install
+        if: ${{ hashFiles(format('{0}/package.json', matrix.directory)) != '' }}
         working-directory: ./${{ matrix.directory }}
 
       - name: Check formatting
