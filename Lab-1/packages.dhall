@@ -103,3 +103,14 @@ let upstream =
         sha256:3b81bf89b8644c218274383c860cd1dbf350637b4f3ebe5d0aceba96bd020732
 
 in  upstream
+  with purescript-infinite-lists =
+    { dependencies =
+       [ "lazy"
+       , "maybe"
+       , "tuples"
+       ]
+    , repo =
+       "https://github.com/Thimoteus/purescript-infinite-lists.git"
+    , version =
+        "master"
+    }

@@ -17,10 +17,12 @@ to generate this file without the comments in this block.
   , "console"
   , "effect"
   , "integers"
+  , "lists"
   , "maybe"
   , "node-buffer"
   , "node-fs"
   , "prelude"
+  , "purescript-infinite-lists"
   , "strings"
   , "test-unit"
   ]
