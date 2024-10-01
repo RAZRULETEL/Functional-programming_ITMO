@@ -32,3 +32,9 @@ insert (CreateDict dict) key value = CreateDict ({root: Just $ insertInternal di
   insertInternal (Just (CreateDictNode node)) | key > node.key = CreateDictNode({ key: node.key, value: node.value, leftLeaf: node.leftLeaf, rightLeaf: Just $ insertInternal node.rightLeaf })
                                                         | key < node.key = CreateDictNode({ key: node.key, value: node.value, leftLeaf: Just $ insertInternal node.leftLeaf, rightLeaf: node.rightLeaf })
                                                         | otherwise = (CreateDictNode node) -- duplicates not allowed
+
+singleton :: forall a b. a -> b -> Dict a b
+singleton key value = CreateDict ({root: Just $ singletonNode key value})
+
+singletonNode :: forall a b. a -> b -> DictNode a b
+singletonNode key value = CreateDictNode({ key: key, value: value, leftLeaf: Nothing, rightLeaf: Nothing })

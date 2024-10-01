@@ -4,7 +4,7 @@ import Prelude
 
 import Effect (Effect)
 import Effect.Console (log)
-import Dict (Dict(..), DictNode(..), insert, length)
+import Dict (Dict(..), DictNode(..), insert, length, singleton)
 import Data.Show (show)
 import Data.Maybe (Maybe(Nothing), Maybe(Just))
 
@@ -24,7 +24,7 @@ multiLayer = CreateDict ({ root: Just first })
   first = CreateDictNode ({ key: 0, value: 0, leftLeaf: Just second, rightLeaf: Nothing })
 
 insertEls :: Dict Int Int
-insertEls = insert (insert (insert empty 1 1) 2 2) 1 1
+insertEls = insert (insert (singleton 1 1) 2 2) 1 1
 
 main :: Effect Unit
 main = do
