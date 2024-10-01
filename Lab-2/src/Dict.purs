@@ -2,7 +2,7 @@ module Dict where
 
 import Prelude
 
-import Data.Maybe (Maybe, isNothing)
+import Data.Maybe (Maybe, Maybe(Nothing), Maybe(..))
 
 newtype DictNode a b = CreateDictNode
   { key :: a
@@ -11,9 +11,15 @@ newtype DictNode a b = CreateDictNode
   , rightLeaf :: Maybe (DictNode a b)
   }
 
-newtype Dict a = CreateDict
-  { root :: Maybe (DictNode a a)
+newtype Dict a b = CreateDict
+  { root :: Maybe (DictNode a b)
   }
 
-length :: forall a. Dict a -> Int
-length (CreateDict dict) = if (isNothing dict.root) then 0 else 1
+length :: forall a b. Dict a b -> Int
+length (CreateDict dict) = lengthInternal dict.root
+  where
+  lengthInternal :: Maybe (DictNode a b) -> Int
+  lengthInternal maybeNode = case maybeNode of
+    Nothing -> 0
+    Just (CreateDictNode node) -> 1 + (lengthInternal node.leftLeaf) + (lengthInternal node.rightLeaf)
+
