@@ -34,7 +34,16 @@ insert (CreateDict dict) key value = CreateDict ({root: Just $ insertInternal di
                                                         | otherwise = (CreateDictNode node) -- duplicates not allowed
 
 singleton :: forall a b. a -> b -> Dict a b
-singleton key value = CreateDict ({root: Just $ singletonNode key value})
+singleton key value = CreateDict ({root: Just $ singletonNode key value Nothing Nothing})
 
-singletonNode :: forall a b. a -> b -> DictNode a b
-singletonNode key value = CreateDictNode({ key: key, value: value, leftLeaf: Nothing, rightLeaf: Nothing })
+singletonNode :: forall a b. a -> b -> Maybe (DictNode a b) -> Maybe (DictNode a b) -> DictNode a b
+singletonNode key value leftLeaf rightLeaf = CreateDictNode({ key: key, value: value, leftLeaf: leftLeaf, rightLeaf: rightLeaf })
+
+remove :: forall a b. Ord a => Dict a b -> a -> Dict a b
+remove (CreateDict dict) key = CreateDict ({root: removeInternal dict.root})
+  where
+  removeInternal :: Ord a => Maybe (DictNode a b) -> Maybe (DictNode a b)
+  removeInternal Nothing = Nothing -- nothing to do with empty dict
+  removeInternal (Just (CreateDictNode node)) | key > node.key = Just $ singletonNode node.key node.value node.leftLeaf $ removeInternal node.rightLeaf
+                                              | key < node.key = Just $ singletonNode node.key node.value (removeInternal node.leftLeaf) node.rightLeaf
+                                              | otherwise = Nothing -- remove on find
