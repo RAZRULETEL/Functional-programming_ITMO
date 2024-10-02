@@ -4,7 +4,7 @@ import Prelude
 
 import Effect (Effect)
 import Effect.Console (log)
-import Dict (Dict(..), DictNode(..), insert, length, singleton)
+import Dict (Dict(..), DictNode(..), get, insert, length, singleton)
 import Data.Show (show)
 import Data.Maybe (Maybe(Nothing), Maybe(Just))
 
@@ -32,3 +32,4 @@ main = do
   log $ show $ length nonEmpty
   log $ show $ length multiLayer
   log $ show $ length insertEls
+  log $ show $ get insertEls 2

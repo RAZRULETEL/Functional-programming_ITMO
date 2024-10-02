@@ -52,7 +52,7 @@ remove (CreateDict dict) key = CreateDict ({ root: removeInternal dict.root })
 
 leftTurn :: forall a b. Dict a b -> Dict a b
 leftTurn (CreateDict { root: Nothing }) = (CreateDict { root: Nothing })
-leftTurn (CreateDict { root: node }) = (CreateDict { root: Just $ leftTurnInternal node })
+leftTurn (CreateDict { root: Just node }) = (CreateDict { root: Just $ leftTurnInternal node })
   where
   leftTurnInternal :: DictNode a b -> DictNode a b
   leftTurnInternal (CreateDictNode root) = case root.rightLeaf of
@@ -70,7 +70,7 @@ leftTurn (CreateDict { root: node }) = (CreateDict { root: Just $ leftTurnIntern
 
 rightTurn :: forall a b. Dict a b -> Dict a b
 rightTurn (CreateDict { root: Nothing }) = (CreateDict { root: Nothing })
-rightTurn (CreateDict { root: node }) = (CreateDict { root: Just $ rightTurnInternal node })
+rightTurn (CreateDict { root: Just node }) = (CreateDict { root: Just $ rightTurnInternal node })
   where
   rightTurnInternal :: DictNode a b -> DictNode a b
   rightTurnInternal (CreateDictNode root) = case root.leftLeaf of
@@ -85,3 +85,21 @@ rightTurn (CreateDict { root: node }) = (CreateDict { root: Just $ rightTurnInte
           left.rightLeaf
           root.rightLeaf
       )
+
+get :: forall a b. Ord a => Dict a b -> a -> Maybe b
+get (CreateDict { root: Nothing }) key = Nothing
+get (CreateDict { root: Just node }) key = getInternal node
+  where
+  getInternal :: DictNode a b -> Maybe b
+  getInternal (CreateDictNode node) =
+    if node.key == key then Just node.value
+    else
+      case node.leftLeaf of
+        Just node1 -> case getInternal node1 of
+          Just val -> Just val
+          Nothing -> case node.rightLeaf of
+            Just node2 -> getInternal node2
+            Nothing -> Nothing
+        Nothing -> case node.rightLeaf of
+          Just node2 -> getInternal node2
+          Nothing -> Nothing
