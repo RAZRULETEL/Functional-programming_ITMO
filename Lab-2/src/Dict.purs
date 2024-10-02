@@ -32,6 +32,10 @@ length (CreateDict dict) = lengthInternal dict.root
     Nothing -> 0
     Just (CreateDictNode node) -> 1 + (lengthInternal node.leftLeaf) + (lengthInternal node.rightLeaf)
 
+height :: forall a b. Dict a b -> Int
+height (CreateDict { root: Nothing }) = 0
+height (CreateDict { root: Just (CreateDictNode node) }) = node.height + 1
+
 singleton :: forall a b. a -> b -> Dict a b
 singleton key value = CreateDict ({ root: Just $ singletonNode key value Nothing Nothing 0 })
 
