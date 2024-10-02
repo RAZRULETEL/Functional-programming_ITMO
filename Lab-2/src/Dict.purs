@@ -49,3 +49,39 @@ remove (CreateDict dict) key = CreateDict ({ root: removeInternal dict.root })
     | key > node.key = Just $ singletonNode node.key node.value node.leftLeaf $ removeInternal node.rightLeaf
     | key < node.key = Just $ singletonNode node.key node.value (removeInternal node.leftLeaf) node.rightLeaf
     | otherwise = Nothing -- remove on find
+
+leftTurn :: forall a b. Dict a b -> Dict a b
+leftTurn (CreateDict { root: Nothing }) = (CreateDict { root: Nothing })
+leftTurn (CreateDict { root: node }) = (CreateDict { root: Just $ leftTurnInternal node })
+  where
+  leftTurnInternal :: DictNode a b -> DictNode a b
+  leftTurnInternal (CreateDictNode root) = case root.rightLeaf of
+    Nothing -> (CreateDictNode root)
+    Just (CreateDictNode right) -> singletonNode
+      right.key
+      right.value
+      ( Just $ singletonNode
+          root.key
+          root.value
+          root.leftLeaf
+          right.leftLeaf
+      )
+      right.rightLeaf
+
+rightTurn :: forall a b. Dict a b -> Dict a b
+rightTurn (CreateDict { root: Nothing }) = (CreateDict { root: Nothing })
+rightTurn (CreateDict { root: node }) = (CreateDict { root: Just $ rightTurnInternal node })
+  where
+  rightTurnInternal :: DictNode a b -> DictNode a b
+  rightTurnInternal (CreateDictNode root) = case root.leftLeaf of
+    Nothing -> (CreateDictNode root)
+    Just (CreateDictNode left) -> singletonNode
+      left.key
+      left.value
+      left.leftLeaf
+      ( Just $ singletonNode
+          root.key
+          root.value
+          left.rightLeaf
+          root.rightLeaf
+      )
