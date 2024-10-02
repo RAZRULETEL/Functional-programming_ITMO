@@ -123,3 +123,19 @@ get (CreateDict dict) key = getInternal dict.root
                                            | key > node.key = getInternal node.rightLeaf
                                            | key < node.key = getInternal node.leftLeaf
                                            | otherwise = Nothing
+
+balanceTree :: forall a b. Dict a b -> Dict a b
+balanceTree (CreateDict dict) = CreateDict ({root: balanceTreeInternal dict.root})
+  where
+  balanceTreeInternal :: Maybe (DictNode a b) -> Maybe (DictNode a b)
+  balanceTreeInternal Nothing = Nothing
+  balanceTreeInternal (Just (CreateDictNode node)) = do
+    let left =  balanceTreeInternal node.leftLeaf
+    let right =  balanceTreeInternal node.rightLeaf
+    let newLeftHeight = getMaybeHeight $ left
+    let newRightHeight = getMaybeHeight $ right
+    let newTree | newLeftHeight - newRightHeight > 1 = rightTurn $ CreateDict ({root: Just $ singletonNode node.key node.value left right node.height})
+                      | newLeftHeight - newRightHeight < -1 = leftTurn $ CreateDict ({root: Just $ singletonNode node.key node.value left right node.height})
+                      | otherwise = CreateDict ({root: Just $ (CreateDictNode node)})
+    let newNode (CreateDict tempDict) = tempDict.root
+    newNode newTree
