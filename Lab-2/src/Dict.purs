@@ -87,19 +87,11 @@ rightTurn (CreateDict { root: Just node }) = (CreateDict { root: Just $ rightTur
       )
 
 get :: forall a b. Ord a => Dict a b -> a -> Maybe b
-get (CreateDict { root: Nothing }) key = Nothing
-get (CreateDict { root: Just node }) key = getInternal node
+get (CreateDict dict) key = getInternal dict.root
   where
-  getInternal :: DictNode a b -> Maybe b
-  getInternal (CreateDictNode node) =
-    if node.key == key then Just node.value
-    else
-      case node.leftLeaf of
-        Just node1 -> case getInternal node1 of
-          Just val -> Just val
-          Nothing -> case node.rightLeaf of
-            Just node2 -> getInternal node2
-            Nothing -> Nothing
-        Nothing -> case node.rightLeaf of
-          Just node2 -> getInternal node2
-          Nothing -> Nothing
+  getInternal :: Maybe (DictNode a b) -> Maybe b
+  getInternal Nothing = Nothing
+  getInternal (Just (CreateDictNode node)) | key == node.key = Just node.value
+                                           | key > node.key = getInternal node.rightLeaf
+                                           | key < node.key = getInternal node.leftLeaf
+                                           | otherwise = Nothing
