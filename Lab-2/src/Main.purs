@@ -4,7 +4,7 @@ import Prelude
 
 import Effect (Effect)
 import Effect.Console (log)
-import Dict (Dict(..), DictNode(..), get, height, insert, leftTurn, length, singleton)
+import Dict (Dict(..), DictNode(..), balanceTree, height, insert, length, singleton)
 import Data.Show (show)
 import Data.Maybe (Maybe(Nothing), Maybe(Just))
 
@@ -33,5 +33,5 @@ main = do
   log $ show $ length multiLayer
   log $ show $ length insertEls
   log $ show $ height insertEls
-  log $ show $ length $ leftTurn insertEls
-  log $ show $ height $ leftTurn insertEls
+  log $ show $ length $ balanceTree insertEls
+  log $ show $ height $ balanceTree insertEls

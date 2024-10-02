@@ -20,7 +20,7 @@ newtype Dict a b = CreateDict
 getHeight :: forall a b. DictNode a b -> Int
 getHeight (CreateDictNode node) = node.height
 
-getMaybeHeight :: forall a b. Maybe (DictNode a b)-> Int
+getMaybeHeight :: forall a b. Maybe (DictNode a b) -> Int
 getMaybeHeight (Just node) = getHeight node
 getMaybeHeight Nothing = -1
 
@@ -49,13 +49,13 @@ insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal d
   insertInternal Nothing = singletonNode key value Nothing Nothing 0
   insertInternal (Just (CreateDictNode node))
     | key > node.key =
-      do
-      let editNode = insertInternal node.rightLeaf
-      singletonNode node.key node.value node.leftLeaf (Just editNode) $ 1 + max (getHeight editNode) (getMaybeHeight node.leftLeaf)
+        do
+          let editNode = insertInternal node.rightLeaf
+          singletonNode node.key node.value node.leftLeaf (Just editNode) $ 1 + max (getHeight editNode) (getMaybeHeight node.leftLeaf)
     | key < node.key =
-      do
-      let editNode = insertInternal node.rightLeaf
-      singletonNode node.key node.value (Just editNode) node.rightLeaf $ 1 + max (getHeight editNode) (getMaybeHeight node.rightLeaf)
+        do
+          let editNode = insertInternal node.rightLeaf
+          singletonNode node.key node.value (Just editNode) node.rightLeaf $ 1 + max (getHeight editNode) (getMaybeHeight node.rightLeaf)
     | otherwise = (CreateDictNode node) -- duplicates not allowed
 
 remove :: forall a b. Ord a => Dict a b -> a -> Dict a b
@@ -65,13 +65,13 @@ remove (CreateDict dict) key = CreateDict ({ root: removeInternal dict.root })
   removeInternal Nothing = Nothing -- nothing to do with empty dict
   removeInternal (Just (CreateDictNode node))
     | key > node.key =
-      do
-      let removedNode = removeInternal node.rightLeaf
-      Just $ singletonNode node.key node.value node.leftLeaf removedNode $ 1 + max (getMaybeHeight node.leftLeaf) (getMaybeHeight removedNode)
+        do
+          let removedNode = removeInternal node.rightLeaf
+          Just $ singletonNode node.key node.value node.leftLeaf removedNode $ 1 + max (getMaybeHeight node.leftLeaf) (getMaybeHeight removedNode)
     | key < node.key =
-      do
-      let removedNode = removeInternal node.leftLeaf
-      Just $ singletonNode node.key node.value removedNode node.rightLeaf $ 1 + max (getMaybeHeight node.rightLeaf) (getMaybeHeight removedNode)
+        do
+          let removedNode = removeInternal node.leftLeaf
+          Just $ singletonNode node.key node.value removedNode node.rightLeaf $ 1 + max (getMaybeHeight node.rightLeaf) (getMaybeHeight removedNode)
     | otherwise = Nothing -- remove on find
 
 leftTurn :: forall a b. Dict a b -> Dict a b
@@ -123,23 +123,26 @@ get (CreateDict dict) key = getInternal dict.root
   where
   getInternal :: Maybe (DictNode a b) -> Maybe b
   getInternal Nothing = Nothing
-  getInternal (Just (CreateDictNode node)) | key == node.key = Just node.value
-                                           | key > node.key = getInternal node.rightLeaf
-                                           | key < node.key = getInternal node.leftLeaf
-                                           | otherwise = Nothing
+  getInternal (Just (CreateDictNode node))
+    | key == node.key = Just node.value
+    | key > node.key = getInternal node.rightLeaf
+    | key < node.key = getInternal node.leftLeaf
+    | otherwise = Nothing
 
 balanceTree :: forall a b. Dict a b -> Dict a b
-balanceTree (CreateDict dict) = CreateDict ({root: balanceTreeInternal dict.root})
+balanceTree (CreateDict dict) = CreateDict ({ root: balanceTreeInternal dict.root })
   where
   balanceTreeInternal :: Maybe (DictNode a b) -> Maybe (DictNode a b)
   balanceTreeInternal Nothing = Nothing
   balanceTreeInternal (Just (CreateDictNode node)) = do
-    let left =  balanceTreeInternal node.leftLeaf
-    let right =  balanceTreeInternal node.rightLeaf
+    let left = balanceTreeInternal node.leftLeaf
+    let right = balanceTreeInternal node.rightLeaf
     let newLeftHeight = getMaybeHeight $ left
     let newRightHeight = getMaybeHeight $ right
-    let newTree | newLeftHeight - newRightHeight > 1 = rightTurn $ CreateDict ({root: Just $ singletonNode node.key node.value left right node.height})
-                      | newLeftHeight - newRightHeight < -1 = leftTurn $ CreateDict ({root: Just $ singletonNode node.key node.value left right node.height})
-                      | otherwise = CreateDict ({root: Just $ (CreateDictNode node)})
+    let
+      newTree
+        | newLeftHeight - newRightHeight > 1 = rightTurn $ CreateDict ({ root: Just $ singletonNode node.key node.value left right node.height })
+        | newLeftHeight - newRightHeight < -1 = leftTurn $ CreateDict ({ root: Just $ singletonNode node.key node.value left right node.height })
+        | otherwise = CreateDict ({ root: Just $ (CreateDictNode node) })
     let newNode (CreateDict tempDict) = tempDict.root
     newNode newTree
