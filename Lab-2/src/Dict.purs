@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe, Maybe(Nothing), Maybe(..))
 import Data.Boolean (otherwise)
+import Data.Show (show)
 
 newtype DictNode a b = CreateDictNode
   { key :: a
@@ -59,14 +60,40 @@ insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal d
               let editNode = insertInternal node.leftLeaf
               singletonNode node.key node.value (Just editNode) node.rightLeaf $ 1 + max (getHeight editNode) (getMaybeHeight node.rightLeaf)
         | otherwise = (CreateDictNode node) -- duplicates not allowed
+    let insertedRecord = case insertedNode of (CreateDictNode node) -> node
 
-    let leftHeight = case insertedNode of (CreateDictNode node) -> getMaybeHeight node.leftLeaf
-    let rightHeight = case insertedNode of (CreateDictNode node) -> getMaybeHeight node.rightLeaf
+    let leftHeight = getMaybeHeight insertedRecord.leftLeaf -- height of left leaf, next heights of leaves of this leaf
+    let
+      leftLeftHeight = case insertedRecord.leftLeaf of
+        Just (CreateDictNode node1) -> getMaybeHeight node1.leftLeaf
+        _ -> getMaybeHeight Nothing
+    let
+      rightLeftHeight = case insertedRecord.leftLeaf of
+        Just (CreateDictNode node1) -> getMaybeHeight node1.rightLeaf
+        _ -> getMaybeHeight Nothing
+    let rightHeight = getMaybeHeight insertedRecord.rightLeaf -- height of right leaf, next heights of leaves of this leaf
+    let
+      leftRightHeight = case insertedRecord.rightLeaf of
+        Just (CreateDictNode node1) -> getMaybeHeight node1.leftLeaf
+        _ -> getMaybeHeight Nothing
+    let
+      rightRightHeight = case insertedRecord.rightLeaf of
+        Just (CreateDictNode node1) -> getMaybeHeight node1.rightLeaf
+        _ -> getMaybeHeight Nothing
     let
       balancedNode
+        | leftHeight - rightHeight > 1 && rightLeftHeight > leftLeftHeight = rightTurnInternal $
+            case insertedRecord.leftLeaf of
+              Just node -> singletonNode insertedRecord.key insertedRecord.value (Just $ leftTurnInternal node) insertedRecord.rightLeaf insertedRecord.height
+              Nothing -> (CreateDictNode insertedRecord)
         | leftHeight - rightHeight > 1 = rightTurnInternal insertedNode
+        | leftHeight - rightHeight < -1 && rightRightHeight > leftRightHeight = leftTurnInternal $
+            case insertedRecord.rightLeaf of
+              Just node -> singletonNode insertedRecord.key insertedRecord.value insertedRecord.leftLeaf (Just $ rightTurnInternal node) insertedRecord.height
+              Nothing -> (CreateDictNode insertedRecord)
         | leftHeight - rightHeight < -1 = leftTurnInternal insertedNode
         | otherwise = insertedNode
+
     balancedNode
 
 remove :: forall a b. Ord a => Dict a b -> a -> Dict a b
