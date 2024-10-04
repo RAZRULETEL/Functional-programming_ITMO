@@ -33,5 +33,4 @@ main = do
   log $ show $ length multiLayer
   log $ show $ length insertEls
   log $ show $ height insertEls
-  log $ show $ length $ balanceTree insertEls
-  log $ show $ height $ balanceTree insertEls
+  log $ show $ show insertEls

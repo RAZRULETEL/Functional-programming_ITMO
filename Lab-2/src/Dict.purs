@@ -43,6 +43,12 @@ singleton key value = CreateDict ({ root: Just $ singletonNode key value Nothing
 singletonNode :: forall a b. a -> b -> Maybe (DictNode a b) -> Maybe (DictNode a b) -> Int -> DictNode a b
 singletonNode key value leftLeaf rightLeaf height = CreateDictNode ({ key: key, value: value, leftLeaf: leftLeaf, rightLeaf: rightLeaf, height: height })
 
+instance (Show a, Show b) => Show (Dict a b) where
+  show (CreateDict a) = show a
+
+instance (Show a, Show b) => Show (DictNode a b) where
+  show (CreateDictNode node) = "{ key: " <> show node.key <> ", value: " <> "show node.value" <> ", height: " <> show node.height <> ", left: " <> show node.leftLeaf <> " , right: " <> show node.rightLeaf <> " }"
+
 insert :: forall a b. Ord a => Dict a b -> a -> b -> Dict a b
 insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal dict.root })
   where
