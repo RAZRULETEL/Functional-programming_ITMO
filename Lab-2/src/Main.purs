@@ -24,7 +24,7 @@ multiLayer = CreateDict ({ root: Just first })
   first = CreateDictNode ({ key: 0, value: 0, leftLeaf: Just second, rightLeaf: Nothing, height: 0 })
 
 insertEls :: Dict Int Int
-insertEls = insert (insert (singleton 1 1) 2 2) 3 3
+insertEls = insert (insert (insert (insert (insert (singleton 5 5) 3 3) 7 7) 8 8) 9 9) 10 10
 
 main :: Effect Unit
 main = do
