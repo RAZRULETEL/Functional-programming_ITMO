@@ -56,7 +56,7 @@ insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal d
               singletonNode node.key node.value node.leftLeaf (Just editNode) $ 1 + max (getHeight editNode) (getMaybeHeight node.leftLeaf)
         | key < node.key =
             do
-              let editNode = insertInternal node.rightLeaf
+              let editNode = insertInternal node.leftLeaf
               singletonNode node.key node.value (Just editNode) node.rightLeaf $ 1 + max (getHeight editNode) (getMaybeHeight node.rightLeaf)
         | otherwise = (CreateDictNode node) -- duplicates not allowed
 
