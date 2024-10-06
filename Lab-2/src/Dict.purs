@@ -30,10 +30,22 @@ instance (Eq a, Eq b) => Eq (Dict a b) where
 
 instance (Eq a, Eq b) => Eq (DictNode a b) where
   eq (CreateDictNode dict1) (CreateDictNode dict2) = dict1.key == dict2.key
-                                                  && dict1.value == dict2.value
-                                                  && dict1.leftLeaf == dict2.leftLeaf
-                                                  && dict1.rightLeaf == dict2.rightLeaf
-                                                  && dict1.height == dict2.height
+    && dict1.value == dict2.value
+    && dict1.leftLeaf == dict2.leftLeaf
+    && dict1.rightLeaf == dict2.rightLeaf
+    && dict1.height == dict2.height
+
+instance Ord a => Semigroup (Dict a b) where
+  append (CreateDict dict1) (CreateDict dict2) = appendInternal (CreateDict dict1) dict2.root
+    where
+    appendInternal :: Dict a b -> Maybe (DictNode a b) -> Dict a b
+    appendInternal dictSum Nothing = dictSum
+    appendInternal dictSum (Just (CreateDictNode node)) = do
+      let summed = appendInternal (appendInternal dictSum node.leftLeaf) node.rightLeaf
+      insert summed node.key node.value
+
+instance Ord a => Monoid (Dict a b) where
+  mempty = (CreateDict { root: Nothing })
 
 getHeight :: forall a b. DictNode a b -> Int
 getHeight (CreateDictNode node) = node.height
@@ -281,7 +293,7 @@ filter func (CreateDict dict) = filterInternal (CreateDict dict) dict.root
     if (func node.key node.value) then (remove filtered node.key) else filtered
 
 map :: forall a b c d. Ord a => Ord c => (a -> b -> Tuple c d) -> Dict a b -> Dict c d
-map func (CreateDict dict) = mapInternal (CreateDict {root: Nothing}) dict.root
+map func (CreateDict dict) = mapInternal (CreateDict { root: Nothing }) dict.root
   where
   mapInternal :: Dict c d -> Maybe (DictNode a b) -> Dict c d
   mapInternal dict Nothing = dict
