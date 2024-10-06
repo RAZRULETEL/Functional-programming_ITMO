@@ -5,7 +5,7 @@ import Prelude
 import Data.Maybe (Maybe, Maybe(Nothing), Maybe(..), isNothing)
 import Data.Boolean (otherwise)
 import Data.Show (show)
-import Data.Tuple (Tuple(Tuple), uncurry)
+import Data.Tuple (Tuple(Tuple), fst, snd, uncurry)
 
 newtype DictNode a b = CreateDictNode
   { key :: a
@@ -279,3 +279,13 @@ filter func (CreateDict dict) = filterInternal (CreateDict dict) dict.root
   filterInternal dict (Just (CreateDictNode node)) = do
     let filtered = filterInternal (filterInternal dict node.leftLeaf) node.rightLeaf
     if (func node.key node.value) then (remove filtered node.key) else filtered
+
+map :: forall a b c d. Ord a => Ord c => (a -> b -> Tuple c d) -> Dict a b -> Dict c d
+map func (CreateDict dict) = mapInternal (CreateDict {root: Nothing}) dict.root
+  where
+  mapInternal :: Dict c d -> Maybe (DictNode a b) -> Dict c d
+  mapInternal dict Nothing = dict
+  mapInternal dict (Just (CreateDictNode node)) = do
+    let mapped = mapInternal (mapInternal dict node.leftLeaf) node.rightLeaf
+    let mapResult = func node.key node.value
+    insert mapped (fst mapResult) (snd mapResult)
