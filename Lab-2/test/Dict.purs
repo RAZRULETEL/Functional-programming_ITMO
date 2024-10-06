@@ -6,7 +6,7 @@ import Effect (Effect)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
-import Dict (filter, get, height, insert, length, remove, singleton, map)
+import Dict (filter, foldrDict, get, height, insert, length, map, remove, singleton)
 import Data.Maybe (Maybe(Just), Maybe(Nothing), fromMaybe)
 import Data.Tuple (Tuple(Tuple))
 import Data.Show (show)
@@ -122,3 +122,13 @@ testDict = do
           Tuple
             (filter (\key value -> getOrZero key difficultRotatedDictMult3 == value) multiplied)
             (filter (\key value -> getOrZero key multiplied == value) difficultRotatedDictMult3)
+    suite "foldr" do
+      test "to ascending string"
+        $ Assert.equal "1 2 3 4 5 6 7 8 "
+        $ foldrDict (\key value str -> show key <> " " <> show value <> " " <> str) "" simpleRotatedDict
+      test "to descending string"
+        $ Assert.equal " 7 8 5 6 3 4 1 2"
+        $ foldrDict (\key value str ->  str <> " " <> show key <> " " <> show value) "" simpleRotatedDict
+      test "substraction"
+        $ Assert.equal (2 - (4 - (6 - (8 - 0))))
+        $ foldrDict (\key value acc -> value - acc) 0 simpleRotatedDict

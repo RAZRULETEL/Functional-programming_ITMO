@@ -301,3 +301,19 @@ map func (CreateDict dict) = mapInternal (CreateDict { root: Nothing }) dict.roo
     let mapped = mapInternal (mapInternal dict node.leftLeaf) node.rightLeaf
     let mapResult = func node.key node.value
     insert mapped (fst mapResult) (snd mapResult)
+
+foldrDict :: forall a b c. (a -> b -> c -> c) -> c -> Dict a b -> c
+foldrDict func init (CreateDict dict) = case dict.root of
+  Nothing -> init
+  Just root -> foldrDictInternal root init
+    where
+    foldrDictInternal :: DictNode a b -> c -> c
+    foldrDictInternal (CreateDictNode node) c = do
+      let
+        rightSubTreeResult = case node.rightLeaf of
+          Just right -> foldrDictInternal right c
+          Nothing -> c
+      let selfComputed = func node.key node.value rightSubTreeResult
+      case node.leftLeaf of
+        Just left -> foldrDictInternal left selfComputed
+        Nothing -> selfComputed
