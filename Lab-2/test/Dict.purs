@@ -6,7 +6,7 @@ import Effect (Effect)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
-import Dict (get, height, insert, length, remove, singleton)
+import Dict (filter, get, height, insert, length, remove, singleton)
 import Data.Maybe (Maybe(Just), Maybe(Nothing))
 import Data.Tuple (Tuple(Tuple))
 import Data.Show (show)
@@ -97,3 +97,10 @@ testDict = do
         $ Assert.equal [Nothing, (Just 6), (Just 2), (Just 4)]
         $ [(get balanceLRRemoveDict 9), (get balanceLRRemoveDict 5),
             (get balanceLRRemoveDict 1), (get balanceLRRemoveDict 3)]
+    suite "filter" do
+      test "match all"
+        $ Assert.equal difficultRotatedDict
+        $ filter (\key value -> key == value) difficultRotatedDict
+      test "no matches"
+        $ Assert.equal emptyDict
+        $ filter (\key value -> not (key == value)) difficultRotatedDict

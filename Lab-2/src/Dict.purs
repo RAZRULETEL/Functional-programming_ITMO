@@ -270,3 +270,12 @@ get (CreateDict dict) key = getInternal dict.root
     | key > node.key = getInternal node.rightLeaf
     | key < node.key = getInternal node.leftLeaf
     | otherwise = Nothing
+
+filter :: forall a b. Ord a => (a -> b -> Boolean) -> Dict a b -> Dict a b
+filter func (CreateDict dict) = filterInternal (CreateDict dict) dict.root
+  where
+  filterInternal :: Dict a b -> Maybe (DictNode a b) -> Dict a b
+  filterInternal dict Nothing = dict
+  filterInternal dict (Just (CreateDictNode node)) = do
+    let filtered = filterInternal (filterInternal dict node.leftLeaf) node.rightLeaf
+    if (func node.key node.value) then (remove filtered node.key) else filtered
