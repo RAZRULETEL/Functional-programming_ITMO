@@ -6,8 +6,8 @@ import Effect (Effect)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
-import Dict (filter, get, height, insert, length, remove, singleton)
-import Data.Maybe (Maybe(Just), Maybe(Nothing))
+import Dict (filter, get, height, insert, length, remove, singleton, map)
+import Data.Maybe (Maybe(Just), Maybe(Nothing), fromMaybe)
 import Data.Tuple (Tuple(Tuple))
 import Data.Show (show)
 import Effect.Console (log)
@@ -16,6 +16,7 @@ emptyDict = remove (singleton 1 5) 1
 soloDict = singleton 1 5
 simpleRotatedDict = insert (insert (insert (singleton 1 2) 3 4) 5 6) 7 8
 difficultRotatedDict = insert (insert (insert (insert (singleton 7 8) 5 6) 9 10) 1 2) 3 4
+difficultRotatedDictMult3 = insert (insert (insert (insert (singleton 21 24) 15 18) 27 30) 3 6) 9 12
 
 simpleUnbalancedRemoveDict = remove simpleRotatedDict 3
 simpleBalancedRemoveDict = remove difficultRotatedDict 3
@@ -104,3 +105,20 @@ testDict = do
       test "no matches"
         $ Assert.equal emptyDict
         $ filter (\key value -> not (key == value)) difficultRotatedDict
+    suite "map" do
+      test "multiply by 3 (assert keys)"
+        $ Assert.equal (Tuple emptyDict emptyDict)
+        $ do
+          let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
+          let getOrZero key dict = fromMaybe 0 $ get dict key
+          Tuple
+            (filter (\key value -> not (getOrZero key difficultRotatedDictMult3 == 0)) multiplied)
+            (filter (\key value -> not (getOrZero key multiplied == 0)) difficultRotatedDictMult3)
+      test "multiply by 3 (assert values)"
+        $ Assert.equal (Tuple emptyDict emptyDict)
+        $ do
+          let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
+          let getOrZero key dict = fromMaybe 0 $ get dict key
+          Tuple
+            (filter (\key value -> getOrZero key difficultRotatedDictMult3 == value) multiplied)
+            (filter (\key value -> getOrZero key multiplied == value) difficultRotatedDictMult3)
