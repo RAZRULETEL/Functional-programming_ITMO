@@ -4,7 +4,7 @@ import Prelude
 
 import Effect (Effect)
 import Effect.Console (log)
-import Dict (Dict(..), DictNode(..), balanceTree, height, insert, length, singleton)
+import Dict (Dict(..), DictNode(..), height, insert, length, singleton)
 import Data.Show (show)
 import Data.Maybe (Maybe(Nothing), Maybe(Just))
 
