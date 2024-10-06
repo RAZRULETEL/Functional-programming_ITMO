@@ -22,6 +22,9 @@ simpleBalancedRemoveDict = remove difficultRotatedDict 3
 difficultSubTreeRemoveDict = remove difficultRotatedDict 7
 difficultRightSubTreeRemoveDict = remove (insert (insert (insert (insert (singleton 7 8) 5 6) 11 12) 13 14) 9 10) 7
 
+balanceRRemoveDict = remove (remove difficultRotatedDict 5) 9
+balanceLRRemoveDict = remove difficultRotatedDict 9
+
 
 testDict :: Effect Unit
 testDict = do
@@ -82,7 +85,15 @@ testDict = do
         $ Assert.equal [Nothing, (Just 6), (Just 10), (Just 2)]
         $ [(get difficultSubTreeRemoveDict 7), (get difficultSubTreeRemoveDict 5),
             (get difficultSubTreeRemoveDict 9), (get difficultSubTreeRemoveDict 1)]
-      test "difficult search: ubbalanced subtrees (right > left)"
+      test "difficult search: unbalanced subtrees (right > left)"
         $ Assert.equal [Nothing, (Just 14), (Just 6), (Just 10)]
         $ [(get difficultRightSubTreeRemoveDict 7), (get difficultRightSubTreeRemoveDict 13),
             (get difficultRightSubTreeRemoveDict 5), (get difficultRightSubTreeRemoveDict 9)]
+      test "balance: rigth rotation"
+        $ Assert.equal [Nothing, (Just 8), (Just 2), (Just 4)]
+        $ [(get balanceRRemoveDict 9), (get balanceRRemoveDict 7),
+            (get balanceRRemoveDict 1), (get balanceRRemoveDict 3)]
+      test "balance: left-rigth rotation"
+        $ Assert.equal [Nothing, (Just 6), (Just 2), (Just 4)]
+        $ [(get balanceLRRemoveDict 9), (get balanceLRRemoveDict 5),
+            (get balanceLRRemoveDict 1), (get balanceLRRemoveDict 3)]
