@@ -6,10 +6,13 @@ import Effect (Effect)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
-import Dict (filter, foldlDict, foldrDict, get, height, insert, map, length, remove, singleton)
+import Dict (Dict, filter, foldlDict, foldrDict, get, height, insert, length, map, remove, singleton)
 import Data.Maybe (Maybe(Just), Maybe(Nothing), fromMaybe)
-import Data.Tuple (Tuple(Tuple))
+import Data.Tuple (Tuple(Tuple), uncurry)
 import Data.Show (show)
+import Test.QuickCheck (quickCheck)
+import Data.Monoid (mempty)
+import Data.Array (foldl)
 
 emptyDict = remove (singleton 1 5) 1
 soloDict = singleton 1 5
@@ -155,3 +158,13 @@ testDict = do
       test "substraction"
         $ Assert.equal ((((0 - 2) - 4) - 6) - 8)
         $ foldlDict (\key acc value -> acc - value) 0 simpleRotatedDict
+  quickCheck testableDict
+  where
+  generatedDict :: forall a b. Ord a => Array (Tuple a b) -> Dict a b
+  generatedDict arr = foldl (\dict tuple -> uncurry (\k v -> insert dict k v) tuple) mempty arr
+
+  testableDict :: forall a b. Array (Tuple Int Int) -> Boolean
+  testableDict arr = do
+    let dict = generatedDict arr
+    eq (append mempty (append mempty dict)) dict
+

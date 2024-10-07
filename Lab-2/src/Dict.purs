@@ -6,6 +6,8 @@ import Data.Maybe (Maybe, Maybe(Nothing), Maybe(..), isNothing)
 import Data.Boolean (otherwise)
 import Data.Show (show)
 import Data.Tuple (Tuple(Tuple), fst, snd, uncurry)
+import Test.QuickCheck (class Testable)
+import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 
 newtype DictNode a b = CreateDictNode
   { key :: a
