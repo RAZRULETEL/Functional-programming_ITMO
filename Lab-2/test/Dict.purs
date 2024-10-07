@@ -6,7 +6,7 @@ import Effect (Effect)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
-import Dict (filter, foldrDict, get, height, insert, length, map, remove, singleton)
+import Dict (filter, foldlDict, foldrDict, get, height, insert, length, map, remove, singleton)
 import Data.Maybe (Maybe(Just), Maybe(Nothing), fromMaybe)
 import Data.Tuple (Tuple(Tuple))
 import Data.Show (show)
@@ -25,7 +25,6 @@ difficultRightSubTreeRemoveDict = remove (insert (insert (insert (insert (single
 
 balanceRRemoveDict = remove (remove difficultRotatedDict 5) 9
 balanceLRRemoveDict = remove difficultRotatedDict 9
-
 
 testDict :: Effect Unit
 testDict = do
@@ -83,21 +82,37 @@ testDict = do
         $ Assert.equal (Tuple (Just 2) (Just 8))
         $ Tuple (get simpleUnbalancedRemoveDict 1) (get simpleUnbalancedRemoveDict 7)
       test "difficult search: balanced subtrees or left > right"
-        $ Assert.equal [Nothing, (Just 6), (Just 10), (Just 2)]
-        $ [(get difficultSubTreeRemoveDict 7), (get difficultSubTreeRemoveDict 5),
-            (get difficultSubTreeRemoveDict 9), (get difficultSubTreeRemoveDict 1)]
+        $ Assert.equal [ Nothing, (Just 6), (Just 10), (Just 2) ]
+        $
+          [ (get difficultSubTreeRemoveDict 7)
+          , (get difficultSubTreeRemoveDict 5)
+          , (get difficultSubTreeRemoveDict 9)
+          , (get difficultSubTreeRemoveDict 1)
+          ]
       test "difficult search: unbalanced subtrees (right > left)"
-        $ Assert.equal [Nothing, (Just 14), (Just 6), (Just 10)]
-        $ [(get difficultRightSubTreeRemoveDict 7), (get difficultRightSubTreeRemoveDict 13),
-            (get difficultRightSubTreeRemoveDict 5), (get difficultRightSubTreeRemoveDict 9)]
+        $ Assert.equal [ Nothing, (Just 14), (Just 6), (Just 10) ]
+        $
+          [ (get difficultRightSubTreeRemoveDict 7)
+          , (get difficultRightSubTreeRemoveDict 13)
+          , (get difficultRightSubTreeRemoveDict 5)
+          , (get difficultRightSubTreeRemoveDict 9)
+          ]
       test "balance: rigth rotation"
-        $ Assert.equal [Nothing, (Just 8), (Just 2), (Just 4)]
-        $ [(get balanceRRemoveDict 9), (get balanceRRemoveDict 7),
-            (get balanceRRemoveDict 1), (get balanceRRemoveDict 3)]
+        $ Assert.equal [ Nothing, (Just 8), (Just 2), (Just 4) ]
+        $
+          [ (get balanceRRemoveDict 9)
+          , (get balanceRRemoveDict 7)
+          , (get balanceRRemoveDict 1)
+          , (get balanceRRemoveDict 3)
+          ]
       test "balance: left-rigth rotation"
-        $ Assert.equal [Nothing, (Just 6), (Just 2), (Just 4)]
-        $ [(get balanceLRRemoveDict 9), (get balanceLRRemoveDict 5),
-            (get balanceLRRemoveDict 1), (get balanceLRRemoveDict 3)]
+        $ Assert.equal [ Nothing, (Just 6), (Just 2), (Just 4) ]
+        $
+          [ (get balanceLRRemoveDict 9)
+          , (get balanceLRRemoveDict 5)
+          , (get balanceLRRemoveDict 1)
+          , (get balanceLRRemoveDict 3)
+          ]
     suite "filter" do
       test "match all"
         $ Assert.equal difficultRotatedDict
@@ -109,26 +124,36 @@ testDict = do
       test "multiply by 3 (assert keys)"
         $ Assert.equal (Tuple emptyDict emptyDict)
         $ do
-          let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
-          let getOrZero key dict = fromMaybe 0 $ get dict key
-          Tuple
-            (filter (\key value -> not (getOrZero key difficultRotatedDictMult3 == 0)) multiplied)
-            (filter (\key value -> not (getOrZero key multiplied == 0)) difficultRotatedDictMult3)
+            let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
+            let getOrZero key dict = fromMaybe 0 $ get dict key
+            Tuple
+              (filter (\key value -> not (getOrZero key difficultRotatedDictMult3 == 0)) multiplied)
+              (filter (\key value -> not (getOrZero key multiplied == 0)) difficultRotatedDictMult3)
       test "multiply by 3 (assert values)"
         $ Assert.equal (Tuple emptyDict emptyDict)
         $ do
-          let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
-          let getOrZero key dict = fromMaybe 0 $ get dict key
-          Tuple
-            (filter (\key value -> getOrZero key difficultRotatedDictMult3 == value) multiplied)
-            (filter (\key value -> getOrZero key multiplied == value) difficultRotatedDictMult3)
+            let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
+            let getOrZero key dict = fromMaybe 0 $ get dict key
+            Tuple
+              (filter (\key value -> getOrZero key difficultRotatedDictMult3 == value) multiplied)
+              (filter (\key value -> getOrZero key multiplied == value) difficultRotatedDictMult3)
     suite "foldr" do
       test "to ascending string"
         $ Assert.equal "1 2 3 4 5 6 7 8 "
         $ foldrDict (\key value str -> show key <> " " <> show value <> " " <> str) "" simpleRotatedDict
       test "to descending string"
         $ Assert.equal " 7 8 5 6 3 4 1 2"
-        $ foldrDict (\key value str ->  str <> " " <> show key <> " " <> show value) "" simpleRotatedDict
+        $ foldrDict (\key value str -> str <> " " <> show key <> " " <> show value) "" simpleRotatedDict
       test "substraction"
         $ Assert.equal (2 - (4 - (6 - (8 - 0))))
         $ foldrDict (\key value acc -> value - acc) 0 simpleRotatedDict
+    suite "foldl" do
+      test "to ascending string"
+        $ Assert.equal " 1 2 3 4 5 6 7 8"
+        $ foldlDict (\key str value -> str <> " " <> show key <> " " <> show value) "" simpleRotatedDict
+      test "to descending string"
+        $ Assert.equal "7 8 5 6 3 4 1 2 "
+        $ foldlDict (\key str value -> show key <> " " <> show value <> " " <> str) "" simpleRotatedDict
+      test "substraction"
+        $ Assert.equal ((((0 - 2) - 4) - 6) - 8)
+        $ foldlDict (\key acc value -> acc - value) 0 simpleRotatedDict

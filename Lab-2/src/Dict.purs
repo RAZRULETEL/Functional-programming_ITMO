@@ -317,3 +317,19 @@ foldrDict func init (CreateDict dict) = case dict.root of
       case node.leftLeaf of
         Just left -> foldrDictInternal left selfComputed
         Nothing -> selfComputed
+
+foldlDict :: forall a b c. (a -> c -> b -> c) -> c -> Dict a b -> c
+foldlDict func init (CreateDict dict) = case dict.root of
+  Nothing -> init
+  Just root -> foldlDictInternal root init
+    where
+    foldlDictInternal :: DictNode a b -> c -> c
+    foldlDictInternal (CreateDictNode node) c = do
+      let
+        leftSubTreeResult = case node.leftLeaf of
+          Just right -> foldlDictInternal right c
+          Nothing -> c
+      let selfComputed = func node.key leftSubTreeResult node.value
+      case node.rightLeaf of
+        Just left -> foldlDictInternal left selfComputed
+        Nothing -> selfComputed
