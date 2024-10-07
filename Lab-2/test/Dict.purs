@@ -1,16 +1,15 @@
 module Test.Dict where
 
-import Prelude
+import Prelude hiding (map)
 import Effect (Effect)
 
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Main (runTest)
-import Dict (filter, foldlDict, foldrDict, get, height, insert, length, map, remove, singleton)
+import Dict (filter, foldlDict, foldrDict, get, height, insert, map, length, remove, singleton)
 import Data.Maybe (Maybe(Just), Maybe(Nothing), fromMaybe)
 import Data.Tuple (Tuple(Tuple))
 import Data.Show (show)
-import Effect.Console (log)
 
 emptyDict = remove (singleton 1 5) 1
 soloDict = singleton 1 5
@@ -28,7 +27,6 @@ balanceLRRemoveDict = remove difficultRotatedDict 9
 
 testDict :: Effect Unit
 testDict = do
-  (log $ show difficultRightSubTreeRemoveDict)
   runTest do
     test "AVL dict" do
       Assert.equal true true
