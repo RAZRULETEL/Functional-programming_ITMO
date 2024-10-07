@@ -2,12 +2,10 @@ module Dict where
 
 import Prelude
 
-import Data.Maybe (Maybe, Maybe(Nothing), Maybe(..), isNothing)
+import Data.Maybe (Maybe, Maybe(Nothing), Maybe(..))
 import Data.Boolean (otherwise)
 import Data.Show (show)
 import Data.Tuple (Tuple(Tuple), fst, snd, uncurry)
-import Test.QuickCheck (class Testable)
-import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary)
 
 newtype DictNode a b = CreateDictNode
   { key :: a
@@ -27,15 +25,13 @@ instance (Show a, Show b) => Show (Dict a b) where
 instance (Show a, Show b) => Show (DictNode a b) where
   show (CreateDictNode node) = "{ key: " <> show node.key <> ", value: " <> show node.value <> ", height: " <> show node.height <> ", left: " <> show node.leftLeaf <> ", right: " <> show node.rightLeaf <> " }"
 
-instance (Eq a, Eq b) => Eq (Dict a b) where
-  eq (CreateDict dict1) (CreateDict dict2) = eq dict1.root dict2.root
-
-instance (Eq a, Eq b) => Eq (DictNode a b) where
-  eq (CreateDictNode dict1) (CreateDictNode dict2) = dict1.key == dict2.key
-    && dict1.value == dict2.value
-    && dict1.leftLeaf == dict2.leftLeaf
-    && dict1.rightLeaf == dict2.rightLeaf
-    && dict1.height == dict2.height
+instance (Eq a, Eq b, Ord a) => Eq (Dict a b) where
+  eq dict1 dict2 = do
+    if not (length dict1 == length dict2) then false
+    else do
+      let fstFiltered = (filter (\key value -> get dict2 key == Just value) dict1)
+      let sndFiltered = (filter (\key value -> get dict1 key == Just value) dict2)
+      (length fstFiltered == 0 && length sndFiltered == 0)
 
 instance Ord a => Semigroup (Dict a b) where
   append (CreateDict dict1) (CreateDict dict2) = appendInternal (CreateDict dict1) dict2.root

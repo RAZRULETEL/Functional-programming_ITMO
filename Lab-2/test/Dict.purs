@@ -131,13 +131,8 @@ testDict = do
               (filter (\key value -> not (getOrZero key difficultRotatedDictMult3 == 0)) multiplied)
               (filter (\key value -> not (getOrZero key multiplied == 0)) difficultRotatedDictMult3)
       test "multiply by 3 (assert values)"
-        $ Assert.equal (Tuple emptyDict emptyDict)
-        $ do
-            let multiplied = map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
-            let getOrZero key dict = fromMaybe 0 $ get dict key
-            Tuple
-              (filter (\key value -> getOrZero key difficultRotatedDictMult3 == value) multiplied)
-              (filter (\key value -> getOrZero key multiplied == value) difficultRotatedDictMult3)
+        $ Assert.equal difficultRotatedDictMult3
+        $ map (\key value -> Tuple (key * 3) (value * 3)) difficultRotatedDict
     suite "foldr" do
       test "to ascending string"
         $ Assert.equal "1 2 3 4 5 6 7 8 "
@@ -163,7 +158,7 @@ testDict = do
   generatedDict :: forall a b. Ord a => Array (Tuple a b) -> Dict a b
   generatedDict arr = foldl (\dict tuple -> uncurry (\k v -> insert dict k v) tuple) mempty arr
 
-  testableDict :: forall a b. Array (Tuple Int Int) -> Boolean
+  testableDict :: Array (Tuple Int Int) -> Boolean
   testableDict arr = do
     let dict = generatedDict arr
     eq (append mempty (append mempty dict)) dict
