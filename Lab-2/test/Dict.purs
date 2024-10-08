@@ -28,6 +28,9 @@ difficultRightSubTreeRemoveDict = remove (insert (insert (insert (insert (single
 balanceRRemoveDict = remove (remove difficultRotatedDict 5) 9
 balanceLRRemoveDict = remove difficultRotatedDict 9
 
+tupleArrToDict :: forall a b. Ord a => Array (Tuple a b) -> Dict a b
+tupleArrToDict arr = foldl (\dict tuple -> uncurry (\k v -> insert dict k v) tuple) mempty arr
+
 testDict :: Effect Unit
 testDict = do
   runTest do
@@ -153,13 +156,25 @@ testDict = do
       test "substraction"
         $ Assert.equal ((((0 - 2) - 4) - 6) - 8)
         $ foldlDict (\key acc value -> acc - value) 0 simpleRotatedDict
-  quickCheck testableDict
+  quickCheck testableMonoidDict
+  quickCheck testableSemigroupDict
+  quickCheck testableHomomorphizmDict
   where
-  generatedDict :: forall a b. Ord a => Array (Tuple a b) -> Dict a b
-  generatedDict arr = foldl (\dict tuple -> uncurry (\k v -> insert dict k v) tuple) mempty arr
-
-  testableDict :: Array (Tuple Int Int) -> Boolean
-  testableDict arr = do
-    let dict = generatedDict arr
+  testableMonoidDict :: Array (Tuple Int Int) -> Boolean
+  testableMonoidDict arr = do
+    let dict = tupleArrToDict arr
     eq (append mempty (append mempty dict)) dict
 
+  testableSemigroupDict :: Array (Tuple Int Int) -> Array (Tuple Int Int) -> Array (Tuple Int Int) -> Boolean
+  testableSemigroupDict arr1 arr2 arr3 = do
+    let x = tupleArrToDict arr1
+    let y = tupleArrToDict arr2
+    let z = tupleArrToDict arr3
+    eq ((x <> y) <> z) (x <> (y <> z))
+
+  testableHomomorphizmDict :: Array (Tuple Int Int) -> Array (Tuple Int Int) -> Boolean
+  testableHomomorphizmDict arr1 arr2 = do
+    let x = tupleArrToDict arr1
+    let y = tupleArrToDict arr2
+    let mapFunc key value = Tuple (key * value) (value + 53)
+    eq ((map mapFunc x) <> (map mapFunc y)) (map mapFunc (x <> y))
