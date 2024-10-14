@@ -28,10 +28,7 @@ instance (Show a, Show b) => Show (DictNode a b) where
 instance (Eq a, Eq b, Ord a) => Eq (Dict a b) where
   eq dict1 dict2 = do
     if not (length dict1 == length dict2) then false
-    else do
-      let fstFiltered = (filter (\key value -> get dict2 key == Just value) dict1)
-      let sndFiltered = (filter (\key value -> get dict1 key == Just value) dict2)
-      (length fstFiltered == 0 && length sndFiltered == 0)
+    else foldrDict (\k v acc -> acc && get dict2 k == Just v) true dict1
 
 instance Ord a => Semigroup (Dict a b) where
   append (CreateDict dict1) (CreateDict dict2) = appendInternal (CreateDict dict1) dict2.root
