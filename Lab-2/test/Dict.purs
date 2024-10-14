@@ -13,6 +13,8 @@ import Data.Show (show)
 import Test.QuickCheck (quickCheck)
 import Data.Monoid (mempty)
 import Data.Array (foldl)
+import Data.Number (log)
+import Data.Int (ceil, floor, round, toNumber)
 
 emptyDict = remove (singleton 1 5) 1
 soloDict = singleton 1 5
@@ -159,6 +161,7 @@ testDict = do
   quickCheck testableMonoidDict
   quickCheck testableSemigroupDict
   quickCheck testableHomomorphizmDict
+  quickCheck testableBalanceDict
   where
   testableMonoidDict :: Array (Tuple Int Int) -> Boolean
   testableMonoidDict arr = do
@@ -178,3 +181,8 @@ testDict = do
     let y = tupleArrToDict arr2
     let mapFunc key value = Tuple (key * value) (value + 53)
     eq ((map mapFunc x) <> (map mapFunc y)) (map mapFunc (x <> y))
+
+  testableBalanceDict :: Array (Tuple Int Int) -> Boolean
+  testableBalanceDict arr = do
+    let dict = tupleArrToDict arr
+    (height dict) <= (1 + ceil ((log $ toNumber $ length dict) / log 2.0))
