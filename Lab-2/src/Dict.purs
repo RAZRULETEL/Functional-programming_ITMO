@@ -23,7 +23,17 @@ instance (Show a, Show b) => Show (Dict a b) where
   show (CreateDict a) = show a
 
 instance (Show a, Show b) => Show (DictNode a b) where
-  show (CreateDictNode node) = "{ key: " <> show node.key <> ", value: " <> show node.value <> ", height: " <> show node.height <> ", left: " <> show node.leftLeaf <> ", right: " <> show node.rightLeaf <> " }"
+  show (CreateDictNode node) = "{ key: "
+    <> show node.key
+    <> ", value: "
+    <> show node.value
+    <> ", height: "
+    <> show node.height
+    <> ", left: "
+    <> show node.leftLeaf
+    <> ", right: "
+    <> show node.rightLeaf
+    <> " }"
 
 instance (Eq a, Eq b, Ord a) => Eq (Dict a b) where
   eq dict1 dict2 = do
@@ -65,7 +75,14 @@ singleton :: forall a b. a -> b -> Dict a b
 singleton key value = CreateDict ({ root: Just $ singletonNode key value Nothing Nothing 0 })
 
 singletonNode :: forall a b. a -> b -> Maybe (DictNode a b) -> Maybe (DictNode a b) -> Int -> DictNode a b
-singletonNode key value leftLeaf rightLeaf height = CreateDictNode ({ key: key, value: value, leftLeaf: leftLeaf, rightLeaf: rightLeaf, height: height })
+singletonNode key value leftLeaf rightLeaf height = CreateDictNode
+  ( { key: key
+    , value: value
+    , leftLeaf: leftLeaf
+    , rightLeaf: rightLeaf
+    , height: height
+    }
+  )
 
 insert :: forall a b. Ord a => Dict a b -> a -> b -> Dict a b
 insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal dict.root })
@@ -78,11 +95,21 @@ insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal d
         | key > node.key =
             do
               let editNode = insertInternal node.rightLeaf
-              singletonNode node.key node.value node.leftLeaf (Just editNode) $ 1 + max (getHeight editNode) (getMaybeHeight node.leftLeaf)
+              singletonNode
+                node.key
+                node.value
+                node.leftLeaf
+                (Just editNode)
+                $ 1 + max (getHeight editNode) (getMaybeHeight node.leftLeaf)
         | key < node.key =
             do
               let editNode = insertInternal node.leftLeaf
-              singletonNode node.key node.value (Just editNode) node.rightLeaf $ 1 + max (getHeight editNode) (getMaybeHeight node.rightLeaf)
+              singletonNode
+                node.key
+                node.value
+                (Just editNode)
+                node.rightLeaf
+                $ 1 + max (getHeight editNode) (getMaybeHeight node.rightLeaf)
         | otherwise = (CreateDictNode node) -- duplicates not allowed
     let insertedRecord = case insertedNode of (CreateDictNode node) -> node
 
@@ -167,23 +194,32 @@ remove (CreateDict dict) key = CreateDict ({ root: removeInternal dict.root })
               Nothing -> node.rightLeaf
               Just (CreateDictNode leftNode) -> do
                 let
-                  getHighest (CreateDictNode parent) = case if (rightHeight > leftHeight) then parent.leftLeaf else parent.rightLeaf of
-                    Nothing -> Tuple (if (rightHeight > leftHeight) then parent.rightLeaf else parent.leftLeaf) parent
-                    Just rightChild ->
-                      uncurry
-                        ( \subTree highest ->
-                            ( Tuple
-                                ( Just
-                                    $ singletonNode
-                                        parent.key
-                                        parent.value
-                                        (if (rightHeight > leftHeight) then subTree else parent.leftLeaf)
-                                        (if (rightHeight > leftHeight) then parent.rightLeaf else subTree)
-                                    $ 1 + max (getMaybeHeight subTree) (getMaybeHeight $ if (rightHeight > leftHeight) then parent.rightLeaf else parent.leftLeaf)
-                                )
-                                highest
-                            )
-                        ) $ getHighest rightChild
+                  getHighest (CreateDictNode parent) =
+                    case
+                      if (rightHeight > leftHeight) then parent.leftLeaf
+                      else parent.rightLeaf
+                      of
+                      Nothing -> Tuple (if (rightHeight > leftHeight) then parent.rightLeaf else parent.leftLeaf) parent
+                      Just rightChild ->
+                        uncurry
+                          ( \subTree highest ->
+                              ( Tuple
+                                  ( Just
+                                      $ singletonNode
+                                          parent.key
+                                          parent.value
+                                          (if (rightHeight > leftHeight) then subTree else parent.leftLeaf)
+                                          (if (rightHeight > leftHeight) then parent.rightLeaf else subTree)
+                                      $ 1 + max
+                                          (getMaybeHeight subTree)
+                                          ( getMaybeHeight $
+                                              if (rightHeight > leftHeight) then parent.rightLeaf
+                                              else parent.leftLeaf
+                                          )
+                                  )
+                                  highest
+                              )
+                          ) $ getHighest rightChild
 
                 uncurry
                   ( \subTree highest -> Just
@@ -221,12 +257,22 @@ remove (CreateDict dict) key = CreateDict ({ root: removeInternal dict.root })
           balancedNode
             | leftHeight - rightHeight > 1 && rightLeftHeight > leftLeftHeight = rightTurnInternal $
                 case insertedRecord.leftLeaf of
-                  Just node -> singletonNode insertedRecord.key insertedRecord.value (Just $ leftTurnInternal node) insertedRecord.rightLeaf insertedRecord.height
+                  Just node -> singletonNode
+                    insertedRecord.key
+                    insertedRecord.value
+                    (Just $ leftTurnInternal node)
+                    insertedRecord.rightLeaf
+                    insertedRecord.height
                   Nothing -> (CreateDictNode insertedRecord)
             | leftHeight - rightHeight > 1 = rightTurnInternal (CreateDictNode insertedRecord)
             | leftHeight - rightHeight < -1 && rightRightHeight > leftRightHeight = leftTurnInternal $
                 case insertedRecord.rightLeaf of
-                  Just node -> singletonNode insertedRecord.key insertedRecord.value insertedRecord.leftLeaf (Just $ rightTurnInternal node) insertedRecord.height
+                  Just node -> singletonNode
+                    insertedRecord.key
+                    insertedRecord.value
+                    insertedRecord.leftLeaf
+                    (Just $ rightTurnInternal node)
+                    insertedRecord.height
                   Nothing -> (CreateDictNode insertedRecord)
             | leftHeight - rightHeight < -1 = leftTurnInternal (CreateDictNode insertedRecord)
             | otherwise = (CreateDictNode insertedRecord)
