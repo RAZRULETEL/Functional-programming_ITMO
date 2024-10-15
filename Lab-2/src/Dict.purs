@@ -108,12 +108,22 @@ insert (CreateDict dict) key value = CreateDict ({ root: Just $ insertInternal d
       balancedNode
         | leftHeight - rightHeight > 1 && rightLeftHeight > leftLeftHeight = rightTurnInternal $
             case insertedRecord.leftLeaf of
-              Just node -> singletonNode insertedRecord.key insertedRecord.value (Just $ leftTurnInternal node) insertedRecord.rightLeaf insertedRecord.height
+              Just node -> singletonNode
+                insertedRecord.key
+                insertedRecord.value
+                (Just $ leftTurnInternal node)
+                insertedRecord.rightLeaf
+                (1 + max (getHeight $ leftTurnInternal node) (getMaybeHeight insertedRecord.rightLeaf))
               Nothing -> (CreateDictNode insertedRecord)
         | leftHeight - rightHeight > 1 = rightTurnInternal insertedNode
-        | leftHeight - rightHeight < -1 && rightRightHeight > leftRightHeight = leftTurnInternal $
+        | leftHeight - rightHeight < -1 && leftRightHeight > rightRightHeight = leftTurnInternal $
             case insertedRecord.rightLeaf of
-              Just node -> singletonNode insertedRecord.key insertedRecord.value insertedRecord.leftLeaf (Just $ rightTurnInternal node) insertedRecord.height
+              Just node -> singletonNode
+                insertedRecord.key
+                insertedRecord.value
+                insertedRecord.leftLeaf
+                (Just $ rightTurnInternal node)
+                (1 + max (getHeight $ rightTurnInternal node) (getMaybeHeight insertedRecord.leftLeaf))
               Nothing -> (CreateDictNode insertedRecord)
         | leftHeight - rightHeight < -1 = leftTurnInternal insertedNode
         | otherwise = insertedNode

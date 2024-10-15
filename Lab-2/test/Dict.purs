@@ -10,11 +10,11 @@ import Dict (Dict, filter, foldlDict, foldrDict, get, height, insert, length, ma
 import Data.Maybe (Maybe(Just), Maybe(Nothing), fromMaybe)
 import Data.Tuple (Tuple(Tuple), uncurry)
 import Data.Show (show)
-import Test.QuickCheck (quickCheck)
+import Test.QuickCheck (quickCheck, quickCheck')
 import Data.Monoid (mempty)
 import Data.Array (foldl)
 import Data.Number (log)
-import Data.Int (ceil, floor, round, toNumber)
+import Data.Int (ceil, toNumber)
 
 emptyDict = remove (singleton 1 5) 1
 soloDict = singleton 1 5
@@ -161,7 +161,7 @@ testDict = do
   quickCheck testableMonoidDict
   quickCheck testableSemigroupDict
   quickCheck testableHomomorphizmDict
-  quickCheck testableBalanceDict
+  quickCheck' 10000 testableBalanceDict
   where
   testableMonoidDict :: Array (Tuple Int Int) -> Boolean
   testableMonoidDict arr = do
