@@ -13,10 +13,10 @@ import Node.ReadLine (close, createConsoleInterface, lineH, noCompletion, prompt
 import Node.EventEmitter (on_)
 import Data.String.Common (split, trim)
 import Data.Tuple (Tuple(..), fst, snd)
-import Interpolation (linearInterpolate)
+import Interpolation (calcSplitDifference, linearInterpolate, newtonInterpolate)
 import Data.Show (show)
 import Data.Monoid (mempty) as List
-import Data.List (index, length, snoc)
+import Data.List (index, length, range, slice, snoc, uncons)
 import Data.Array as Array
 import Generator (generate)
 
@@ -56,10 +56,15 @@ main = do
       case point of
         Nothing -> log $ "Wrong input, you must enter two numbers splitted by space"
         (Just tuple) -> do
-          Ref.write (snoc old tuple) points
-          log $ "You typed: " <> show tuple <> ", total points: " <> (show $ 1 + length old)
+          let newPoints = (snoc old tuple)
+          
+          Ref.write newPoints points
+          log $ "You typed: " <> show tuple <> ", total points: " <> (show $ length newPoints)
 
-          let linear = linearInterpolate (snoc old tuple) frequency
+          let linear = linearInterpolate newPoints frequency
           when (length linear > 0) do log $ "Linear interpolation:\n" <> show linear
+
+          let newton = newtonInterpolate newPoints frequency
+          when (length newton > 0) do log $ "Newton interpolation:\n" <> show newton
       prompt interface
   prompt interface

@@ -3,13 +3,15 @@ module Interpolation where
 import Prelude
 import Data.List.Types (List)
 import Data.Tuple (Tuple(..), fst, snd)
-import Data.List (unsnoc)
-import Data.Maybe (Maybe(..))
+import Data.List (deleteAt, foldl, index, length, range, slice, unsnoc)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Monoid (mempty) as List
 import Generator (generate)
-import Effect.Console (log)
+import Data.FunctorWithIndex (mapWithIndex)
 
 type Interpolator = List (Tuple Number Number) -> Number -> List (Tuple Number Number)
+
+
 
 linearInterpolate :: List (Tuple Number Number) -> Number -> List (Tuple Number Number)
 linearInterpolate inputPoints step =
@@ -26,3 +28,57 @@ linearInterpolate inputPoints step =
             )
             $ generate step (fst p1) (fst p2)
 
+foldSum :: List Number -> Number
+foldSum = foldl (\acc el -> acc + el) 0.0
+
+foldMul :: List Number -> Number
+foldMul = foldl (\acc el -> acc * el) 1.0
+
+calcSplitDifference :: List (Tuple Number Number) -> Number
+calcSplitDifference list =
+  foldSum
+    $ mapWithIndex
+        ( \i ei ->
+            let
+              remainingList = fromMaybe List.mempty (deleteAt i list)
+            in
+              case length remainingList of
+                0 -> snd ei
+                _ -> snd ei / foldMul (map (\(Tuple xj _) -> fst ei - xj) remainingList)
+        )
+        list
+
+newtonInterpolate :: List (Tuple Number Number) -> Number -> List (Tuple Number Number)
+newtonInterpolate inputPoints step =
+  do
+    if length inputPoints < 3 then List.mempty
+    else
+      do
+
+        let
+          calcInterpolation :: Number -> Tuple Number Number
+          calcInterpolation x = Tuple x
+            $ foldSum
+            $ map
+                ( \i -> calcSplitDifference (slice 0 (i + 1) inputPoints)
+                    *
+                      if i == 0 then 1.0
+                      else
+                        ( foldMul
+                            $ map
+                                (\point -> x - fst point)
+                            $ slice 0 i inputPoints
+                        )
+                )
+            $ range 0
+            $ length inputPoints - 1
+
+        let mfp = index inputPoints (length inputPoints - 5)
+        let mlp = index inputPoints (length inputPoints - 1)
+
+        case Tuple mfp mlp of
+          Tuple (Just fp) (Just lp) ->
+            map
+              calcInterpolation
+              $ generate step (fst fp) (fst lp)
+          _ -> List.mempty
