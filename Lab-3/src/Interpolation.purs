@@ -11,7 +11,8 @@ import Data.FunctorWithIndex (mapWithIndex)
 
 type Interpolator = List (Tuple Number Number) -> Number -> List (Tuple Number Number)
 
-
+newtonCountOfPoints :: Int
+newtonCountOfPoints = 5
 
 linearInterpolate :: List (Tuple Number Number) -> Number -> List (Tuple Number Number)
 linearInterpolate inputPoints step =
@@ -51,10 +52,9 @@ calcSplitDifference list =
 newtonInterpolate :: List (Tuple Number Number) -> Number -> List (Tuple Number Number)
 newtonInterpolate inputPoints step =
   do
-    if length inputPoints < 3 then List.mempty
+    if length inputPoints < newtonCountOfPoints then List.mempty
     else
       do
-
         let
           calcInterpolation :: Number -> Tuple Number Number
           calcInterpolation x = Tuple x
@@ -73,7 +73,7 @@ newtonInterpolate inputPoints step =
             $ range 0
             $ length inputPoints - 1
 
-        let mfp = index inputPoints (length inputPoints - 5)
+        let mfp = index inputPoints (length inputPoints - newtonCountOfPoints)
         let mlp = index inputPoints (length inputPoints - 1)
 
         case Tuple mfp mlp of
