@@ -30,8 +30,8 @@ getArgOrDefault i args default = fromMaybe default $ fromString $ fromMaybe "" (
 printPointsArray :: List (Tuple Number Number) -> Effect Unit
 printPointsArray points =
   do
-  log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map fst points
-  log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map snd points
+    log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map fst points
+    log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map snd points
 
 main :: Effect Unit
 main = do
@@ -71,8 +71,8 @@ main = do
           let linear = linearInterpolate newPoints frequency
           when (length linear > 0)
             do
-            log $ "\nLinear interpolation:"
-            printPointsArray linear
+              log $ "\nLinear interpolation:"
+              printPointsArray linear
 
           let newton = newtonInterpolate newPoints frequency
           when (length newton > 0) do
