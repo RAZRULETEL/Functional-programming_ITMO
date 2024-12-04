@@ -11,7 +11,9 @@ import Data.List (fromFoldable, foldl) as List
 import Data.Tuple (Tuple(Tuple))
 import Data.Monoid (mempty) as List
 import Data.Number (sin)
-import Data.List (foldl)
+import Data.List (foldl, range)
+import Generator (generate)
+import Data.Int (toNumber)
 
 main :: Effect Unit
 main = do
@@ -53,7 +55,7 @@ main = do
       test "[0 0, 0.5 0.47943, 1.5 0.99749, 3 0.14112, 3.14 0] (sin)"
         $ Assert.equal true
         $ foldl
-            (\acc (Tuple _ y) -> acc && (y - sin(y)) < 0.0001)
+            (\acc (Tuple _ y) -> acc && (y - sin (y)) < 0.0001)
             true
             ( map
                 (\(Tuple x y) -> Tuple x $ y - sin (x))
@@ -68,3 +70,10 @@ main = do
                     )
                     0.1
             )
+    suite "Generate" do
+      test "step 1, start 1, end 1.5"
+        $ Assert.equal (List.fromFoldable [ 1.0, 2.0 ])
+        $ generate 1.0 1.0 1.5
+      test "step 1, start -1, end 15"
+        $ Assert.equal (map toNumber $ range (-1) 15)
+        $ generate 1.0 (-1.0) 15.0
