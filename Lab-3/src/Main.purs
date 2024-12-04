@@ -11,20 +11,27 @@ import Effect.Ref (new, read, write) as Ref
 import Data.String.Pattern (Pattern(..))
 import Node.ReadLine (close, createConsoleInterface, lineH, noCompletion, prompt, setPrompt)
 import Node.EventEmitter (on_)
-import Data.String.Common (split, trim)
+import Data.String.Common (joinWith, split, trim)
 import Data.Tuple (Tuple(..), fst, snd)
 import Interpolation (calcSplitDifference, linearInterpolate, newtonInterpolate)
 import Data.Show (show)
 import Data.Monoid (mempty) as List
-import Data.List (index, length, range, slice, snoc, uncons)
+import Data.List (length, snoc, toUnfoldable)
 import Data.Array as Array
-import Generator (generate)
+import Data.List.Types (List)
+import Data.Number.Format (fixed, toStringWith)
 
 defaultStep :: Number
 defaultStep = 1.0
 
 getArgOrDefault :: Int -> Array String -> Number -> Number
 getArgOrDefault i args default = fromMaybe default $ fromString $ fromMaybe "" (Array.index args i)
+
+printPointsArray :: List (Tuple Number Number) -> Effect Unit
+printPointsArray points =
+  do
+  log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map fst points
+  log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map snd points
 
 main :: Effect Unit
 main = do
@@ -57,14 +64,19 @@ main = do
         Nothing -> log $ "Wrong input, you must enter two numbers splitted by space"
         (Just tuple) -> do
           let newPoints = (snoc old tuple)
-          
+
           Ref.write newPoints points
           log $ "You typed: " <> show tuple <> ", total points: " <> (show $ length newPoints)
 
           let linear = linearInterpolate newPoints frequency
-          when (length linear > 0) do log $ "Linear interpolation:\n" <> show linear
+          when (length linear > 0)
+            do
+            log $ "\nLinear interpolation:"
+            printPointsArray linear
 
           let newton = newtonInterpolate newPoints frequency
-          when (length newton > 0) do log $ "Newton interpolation:\n" <> show newton
+          when (length newton > 0) do
+            log $ "\nNewton interpolation:"
+            printPointsArray newton
       prompt interface
   prompt interface

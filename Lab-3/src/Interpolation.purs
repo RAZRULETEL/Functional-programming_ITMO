@@ -23,7 +23,7 @@ linearInterpolate inputPoints step =
         (Just { last: p1 }) ->
           map
             ( \x -> Tuple x $
-                (snd p1 * (fst p2 - fst p1) + snd p2 * (x - fst p1))
+                (snd p1 * (fst p2 - x) + snd p2 * (x - fst p1))
                   / (fst p2 - fst p1)
             )
             $ generate step (fst p1) (fst p2)
