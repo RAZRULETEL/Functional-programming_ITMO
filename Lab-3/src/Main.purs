@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 
-import Effect (Effect)
+import Effect (Effect, foreachE)
 import Effect.Console (log)
 import Node.Process (argv)
 import Data.Number (fromString)
@@ -13,7 +13,7 @@ import Node.ReadLine (close, createConsoleInterface, lineH, noCompletion, prompt
 import Node.EventEmitter (on_)
 import Data.String.Common (joinWith, split, trim)
 import Data.Tuple (Tuple(..), fst, snd)
-import Interpolation (calcSplitDifference, linearInterpolate, newtonInterpolate)
+import Interpolation (Interpolator, calcSplitDifference, linearInterpolate, newtonInterpolate)
 import Data.Show (show)
 import Data.Monoid (mempty) as List
 import Data.List (length, snoc, toUnfoldable)
@@ -24,8 +24,8 @@ import Data.Number.Format (fixed, toStringWith)
 defaultStep :: Number
 defaultStep = 1.0
 
-getArgOrDefault :: Int -> Array String -> Number -> Number
-getArgOrDefault i args default = fromMaybe default $ fromString $ fromMaybe "" (Array.index args i)
+getArgNumberOrDefault :: Int -> Array String -> Number -> Number
+getArgNumberOrDefault i args default = fromMaybe default $ fromString $ fromMaybe "" (Array.index args i)
 
 printPointsArray :: List (Tuple Number Number) -> Effect Unit
 printPointsArray points =
@@ -38,9 +38,20 @@ main = do
 
   args <- argv
 
-  let frequency = getArgOrDefault 2 args defaultStep
+  let frequency = getArgNumberOrDefault 2 args defaultStep
+  let methods = fromMaybe "linear,newton" (Array.index args 3)
 
-  log $ show args
+  let
+    useMethods :: Array (Tuple String Interpolator)
+    useMethods = Array.filter (\(Tuple name _) -> not $ name == "none")
+      $ map
+          ( \method -> case method of
+              "linear" -> Tuple "Linear" linearInterpolate
+              "newton" -> Tuple "Newton" newtonInterpolate
+              _ -> Tuple "none" linearInterpolate
+          )
+      $ split (Pattern ",") methods
+
   log $ "Sampling frequency: " <> (show frequency)
 
   points <- Ref.new List.mempty
@@ -68,15 +79,14 @@ main = do
           Ref.write newPoints points
           log $ "You typed: " <> show tuple <> ", total points: " <> (show $ length newPoints)
 
-          let linear = linearInterpolate newPoints frequency
-          when (length linear > 0)
-            do
-              log $ "\nLinear interpolation:"
-              printPointsArray linear
-
-          let newton = newtonInterpolate newPoints frequency
-          when (length newton > 0) do
-            log $ "\nNewton interpolation:"
-            printPointsArray newton
+          foreachE useMethods
+            ( \(Tuple name method) ->
+                do
+                  let result = method newPoints frequency
+                  when (length result > 0)
+                    do
+                      log $ name <> " interpolation:"
+                      printPointsArray result
+            )
       prompt interface
   prompt interface
