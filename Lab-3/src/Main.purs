@@ -16,10 +16,11 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Interpolation (Interpolator, calcSplitDifference, linearInterpolate, newtonInterpolate)
 import Data.Show (show)
 import Data.Monoid (mempty) as List
-import Data.List (length, snoc, toUnfoldable)
+import Data.List (length, slice, snoc, toUnfoldable)
 import Data.Array as Array
 import Data.List.Types (List)
 import Data.Number.Format (fixed, toStringWith)
+import Data.Array (foldl)
 
 defaultStep :: Number
 defaultStep = 1.0
@@ -27,11 +28,45 @@ defaultStep = 1.0
 getArgNumberOrDefault :: Int -> Array String -> Number -> Number
 getArgNumberOrDefault i args default = fromMaybe default $ fromString $ fromMaybe "" (Array.index args i)
 
-printPointsArray :: List (Tuple Number Number) -> Effect Unit
+printPointsArray :: List (Tuple Number Number) -> String
 printPointsArray points =
+  ("\n" <> (joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map fst points)) <>
+    ( "\n" <> (joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map snd points)
+    )
+
+strToPoint :: String -> Maybe (Tuple Number Number)
+strToPoint str =
   do
-    log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map fst points
-    log $ joinWith "\t" $ toUnfoldable $ map (toStringWith (fixed 2)) $ map snd points
+    let arr = map (\el -> fromString el) $ split (Pattern " ") $ trim str
+    let x = fromMaybe Nothing (Array.index arr 0)
+    let y = fromMaybe Nothing (Array.index arr 1)
+
+    case Tuple x y of
+      (Tuple (Just xv) (Just yv)) -> Just $ Tuple xv yv
+      _ -> Nothing
+
+interpolateWithMethods :: List (Tuple Number Number) -> Array (Tuple String Interpolator) -> Number -> Tuple String (List (Tuple Number Number))
+interpolateWithMethods points methods freq =
+  do
+    let
+      results = map
+        ( \(Tuple name method) ->
+            do
+              let result = method points freq
+              let resPoints = snd result
+
+              Tuple
+                ( if length resPoints > 0 then ("\n" <> name <> " interpolation:" <> (printPointsArray resPoints))
+                  else ""
+                )
+                $ fst result
+        )
+        methods
+
+    let outStr = joinWith "" $ map fst results
+    let maxPoints = foldl (\max e -> if e > max then e else max) 0 $ map snd results
+
+    Tuple outStr $ slice (length points - maxPoints) (length points) points
 
 main :: Effect Unit
 main = do
@@ -62,31 +97,11 @@ main = do
     else do
       old <- Ref.read points
 
-      let arr = map (\el -> fromString el) $ split (Pattern " ") $ trim s
-      let x = fromMaybe Nothing (Array.index arr 0)
-      let y = fromMaybe Nothing (Array.index arr 1)
-
-      let
-        point = case Tuple x y of
-          (Tuple (Just xv) (Just yv)) -> Just $ Tuple xv yv
-          _ -> Nothing
-
-      case point of
+      case strToPoint s of
         Nothing -> log $ "Wrong input, you must enter two numbers splitted by space"
         (Just tuple) -> do
-          let newPoints = (snoc old tuple)
-
-          Ref.write newPoints points
-          log $ "You typed: " <> show tuple <> ", total points: " <> (show $ length newPoints)
-
-          foreachE useMethods
-            ( \(Tuple name method) ->
-                do
-                  let result = method newPoints frequency
-                  when (length result > 0)
-                    do
-                      log $ name <> " interpolation:"
-                      printPointsArray result
-            )
+          let res = interpolateWithMethods (snoc old tuple) useMethods frequency
+          Ref.write (snd res) points
+          log $ fst res
       prompt interface
   prompt interface
